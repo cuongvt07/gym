@@ -26,11 +26,11 @@
                         <i class="bi bi-box-seam me-2"></i>Quản lý Gói tập
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.lich-tap.*') ? 'active' : '' }}" href="{{ route('admin.lich-tap.index') }}">
                         <i class="bi bi-calendar-week me-2"></i>Quản lý Lịch tập
                     </a>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.cham-cong.*') ? 'active' : '' }}" href="{{ route('admin.cham-cong.index') }}">
                         <i class="bi bi-clipboard-check me-2"></i>Chấm công PT
@@ -46,17 +46,17 @@
                         <i class="bi bi-journal-text me-2"></i>Giáo án tập luyện
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.chi-so.*') ? 'active' : '' }}" href="{{ route('admin.chi-so.index') }}">
                         <i class="bi bi-graph-up me-2"></i>Theo dõi chỉ số
                     </a>
-                </li>
-                <li class="nav-item">
+                </li> -->
+                <!-- <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.thanh-toan.*') ? 'active' : '' }}" href="{{ route('admin.thanh-toan.index') }}">
                         <i class="bi bi-cash-coin me-2"></i>Thanh toán
                     </a>
-                </li>
-                <li class="nav-item">
+                </li> -->
+                <!-- <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.bao-cao.*') ? 'active' : '' }}" href="{{ route('admin.bao-cao.index') }}">
                         <i class="bi bi-bar-chart-line me-2"></i>Báo cáo doanh thu
                         <i class="bi bi-people me-2"></i>Học viên <small class="badge bg-secondary">Phase 3</small>
@@ -71,7 +71,7 @@
                     <a class="nav-link disabled" href="#">
                         <i class="bi bi-journal-text me-2"></i>Giáo án <small class="badge bg-secondary">Phase 3</small>
                     </a>
-                </li>
+                </li> -->
             </ul>
         @endif
     </div>
