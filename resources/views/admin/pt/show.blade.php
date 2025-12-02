@@ -22,10 +22,15 @@
         <!-- Profile Card -->
         <div class="card shadow-sm mb-4">
             <div class="card-body text-center">
-                <img src="{{ $pt->nguoiDung->avatar ? asset('storage/' . $pt->nguoiDung->avatar) : asset('images/default-avatar.png') }}" 
-                     alt="Avatar" 
-                     class="rounded-circle avatar-lg mb-3"
-                     onerror="this.src='{{ asset('images/default-avatar.png') }}'">
+                @if($pt->nguoiDung->avatar)
+                    <img src="{{ asset('storage/' . $pt->nguoiDung->avatar) }}" 
+                         alt="Avatar" 
+                         class="rounded-circle avatar-lg mb-3">
+                @else
+                    <div class="mb-3">
+                        <i class="bi bi-person-circle display-1 text-secondary"></i>
+                    </div>
+                @endif
                 <h4>{{ $pt->nguoiDung->ho_ten }}</h4>
                 <p class="text-muted mb-2">Personal Trainer</p>
                 

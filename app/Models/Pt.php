@@ -101,6 +101,6 @@ class Pt extends Model
      */
     public function getAvatarAttribute()
     {
-        return $this->nguoiDung->avatar ?? 'default-avatar.png';
+        return $this->nguoiDung->avatar;
     }
 }

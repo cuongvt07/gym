@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Pt;
 use App\Models\NguoiDung;
+use App\Models\KhachHang;
+use App\Models\DangKyGoi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +40,8 @@ class PtController extends Controller
      */
     public function create()
     {
-        return view('admin.pt.create');
+        $vipCustomers = KhachHang::with('nguoiDung')->vip()->get();
+        return view('admin.pt.create', compact('vipCustomers'));
     }
 
     /**
@@ -94,6 +97,13 @@ class PtController extends Controller
                 'trang_thai' => 'hoat_dong',
             ]);
 
+            // Assign VIP customers if selected
+            if ($request->has('customers')) {
+                DangKyGoi::whereIn('id_khach_hang', $request->customers)
+                    ->where('trang_thai', 'hoat_dong')
+                    ->update(['id_pt' => $pt->id]);
+            }
+
             DB::commit();
 
             return redirect()->route('admin.pt.index')
@@ -120,7 +130,15 @@ class PtController extends Controller
     public function edit(Pt $pt)
     {
         $pt->load('nguoiDung');
-        return view('admin.pt.edit', compact('pt'));
+        $vipCustomers = KhachHang::with('nguoiDung')->vip()->get();
+        
+        // Get IDs of customers currently assigned to this PT
+        $assignedCustomerIds = DangKyGoi::where('id_pt', $pt->id)
+            ->where('trang_thai', 'hoat_dong')
+            ->pluck('id_khach_hang')
+            ->toArray();
+
+        return view('admin.pt.edit', compact('pt', 'vipCustomers', 'assignedCustomerIds'));
     }
 
     /**
@@ -176,6 +194,20 @@ class PtController extends Controller
                 'chung_chi' => $validated['chung_chi'] ?? null,
                 'chuyen_mon' => $validated['chuyen_mon'] ?? [],
             ]);
+
+            // Update VIP customers assignment
+            // 1. Remove PT from unselected customers (who were previously assigned)
+            DangKyGoi::where('id_pt', $pt->id)
+                ->where('trang_thai', 'hoat_dong')
+                ->whereNotIn('id_khach_hang', $request->customers ?? [])
+                ->update(['id_pt' => null]);
+
+            // 2. Assign PT to selected customers
+            if ($request->has('customers')) {
+                DangKyGoi::whereIn('id_khach_hang', $request->customers)
+                    ->where('trang_thai', 'hoat_dong')
+                    ->update(['id_pt' => $pt->id]);
+            }
 
             DB::commit();
 

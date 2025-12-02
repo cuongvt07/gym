@@ -192,6 +192,39 @@
                 </div>
             </div>
             
+            <!-- Danh sách học viên VIP -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-star me-2"></i>Danh sách học viên VIP</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="form-label">Chọn học viên để giảng dạy</label>
+                            <div class="row" style="max-height: 300px; overflow-y: auto;">
+                                @if($vipCustomers->count() > 0)
+                                    @foreach($vipCustomers as $customer)
+                                        <div class="col-md-4 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="customers[]" 
+                                                       value="{{ $customer->id }}" id="customer_{{ $customer->id }}">
+                                                <label class="form-check-label" for="customer_{{ $customer->id }}">
+                                                    {{ $customer->nguoiDung->ho_ten }} ({{ $customer->ma_the }})
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="col-12">
+                                        <p class="text-muted">Chưa có học viên VIP nào.</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <button type="submit" class="btn btn-primary btn-lg">

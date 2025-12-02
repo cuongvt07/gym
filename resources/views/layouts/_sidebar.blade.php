@@ -26,11 +26,11 @@
                         <i class="bi bi-box-seam me-2"></i>Quản lý Gói tập
                     </a>
                 </li>
-                <!-- <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.lich-tap.*') ? 'active' : '' }}" href="{{ route('admin.lich-tap.index') }}">
                         <i class="bi bi-calendar-week me-2"></i>Quản lý Lịch tập
                     </a>
-                </li> -->
+                </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.cham-cong.*') ? 'active' : '' }}" href="{{ route('admin.cham-cong.index') }}">
                         <i class="bi bi-clipboard-check me-2"></i>Chấm công PT

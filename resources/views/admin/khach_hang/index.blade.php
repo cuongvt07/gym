@@ -56,6 +56,7 @@
                         <th>Email</th>
                         <th>Số điện thoại</th>
                         <th>Trạng thái thẻ</th>
+                        <th>Hạng</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
@@ -79,6 +80,13 @@
                                     <span class="badge bg-danger">Khóa</span>
                                 @else
                                     <span class="badge bg-secondary">Hết hạn</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($kh->is_vip)
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>VIP</span>
+                                @else
+                                    <span class="badge bg-light text-dark border">Thường</span>
                                 @endif
                             </td>
                             <td>

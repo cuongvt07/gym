@@ -49,6 +49,24 @@ class KhachHang extends Model
     }
 
     /**
+     * Scope for VIP customers (active package)
+     */
+    public function scopeVip($query)
+    {
+        return $query->whereHas('dangKyGoi', function($q) {
+            $q->where('trang_thai', 'hoat_dong');
+        });
+    }
+
+    /**
+     * Check if customer is VIP
+     */
+    public function getIsVipAttribute()
+    {
+        return $this->dangKyGoi()->where('trang_thai', 'hoat_dong')->exists();
+    }
+
+    /**
      * Scope for searching
      */
     public function scopeSearch($query, $search)
@@ -101,6 +119,6 @@ class KhachHang extends Model
      */
     public function getAvatarAttribute()
     {
-        return $this->nguoiDung->avatar ?? 'default-avatar.png';
+        return $this->nguoiDung->avatar;
     }
 }
