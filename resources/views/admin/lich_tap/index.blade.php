@@ -32,9 +32,143 @@
 </div>
 
 <!-- Calendar -->
-<div class="card shadow-sm">
     <div class="card-body p-0">
         <div id="calendar"></div>
+    </div>
+</div>
+
+<!-- Upcoming Schedules List -->
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-white py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách lịch tập sắp tới</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Khách hàng</th>
+                        <th>PT</th>
+                        <th>Thời gian</th>
+                        <th>Trạng thái</th>
+                        <th>Ghi chú</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($upcomingSchedules as $schedule)
+                        <tr>
+                            <td>
+                                <strong>{{ $schedule->khachHang->nguoiDung->ho_ten }}</strong><br>
+                                <small class="text-muted">{{ $schedule->khachHang->ma_the }}</small>
+                            </td>
+                            <td>{{ $schedule->pt->nguoiDung->ho_ten }}</td>
+                            <td>
+                                {{ $schedule->ngay_tap->format('d/m/Y') }}<br>
+                                <small>{{ \Carbon\Carbon::parse($schedule->gio_bat_dau)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->gio_ket_thuc)->format('H:i') }}</small>
+                            </td>
+                            <td>
+                                @if($schedule->trang_thai == 'da_xep')
+                                    <span class="badge bg-primary">Đã xếp</span>
+                                @elseif($schedule->trang_thai == 'da_hoc')
+                                    <span class="badge bg-success">Đã học</span>
+                                @elseif($schedule->trang_thai == 'huy')
+                                    <span class="badge bg-danger">Đã hủy</span>
+                                @elseif($schedule->trang_thai == 'vang_mat')
+                                    <span class="badge bg-secondary">Vắng mặt</span>
+                                @endif
+                            </td>
+                            <td>{{ Str::limit($schedule->ghi_chu, 30) }}</td>
+                            <td>
+                                @if($schedule->trang_thai == 'da_xep')
+                                    <form action="{{ route('admin.lich-tap.destroy', $schedule->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn hủy lịch này?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm" title="Hủy lịch">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('admin.lich-tap.mark-absent', $schedule->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Đánh dấu vắng mặt (sẽ trừ buổi)?');">
+                                        @csrf
+                                        <button type="submit" class="btn btn-warning btn-sm" title="Vắng mặt">
+                                            <i class="bi bi-person-x"></i>
+                                        </button>
+                                    </form>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-3">Không có lịch tập sắp tới</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create Schedule Modal -->
+<div class="modal fade" id="createModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xếp lịch tập mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.lich-tap.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="create_id_khach_hang" class="form-label">Khách hàng <span class="text-danger">*</span></label>
+                        <select class="form-select" id="create_id_khach_hang" name="id_khach_hang" required>
+                            <option value="">-- Chọn khách hàng --</option>
+                            @foreach($khachHangs as $kh)
+                                <option value="{{ $kh->id }}" data-pt="{{ $kh->dangKyGoi->first()->id_pt }}">
+                                    {{ $kh->nguoiDung->ho_ten }} ({{ $kh->ma_the }}) - Còn {{ $kh->dangKyGoi->sum('buoi_con_lai') }} buổi
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="create_id_pt" class="form-label">PT hướng dẫn <span class="text-danger">*</span></label>
+                        <select class="form-select" id="create_id_pt_display" disabled>
+                            <option value="">-- Chọn PT --</option>
+                            @foreach($pts as $pt)
+                                <option value="{{ $pt->id }}">{{ $pt->nguoiDung->ho_ten }}</option>
+                            @endforeach
+                        </select>
+                        <input type="hidden" name="id_pt" id="create_id_pt">
+                        <div class="form-text">PT được tự động chọn theo gói tập của khách hàng.</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="create_ngay_tap" class="form-label">Ngày tập</label>
+                            <input type="date" class="form-control" id="create_ngay_tap" name="ngay_tap" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Thời gian</label>
+                            <div class="input-group">
+                                <input type="time" class="form-control" id="create_gio_bat_dau" name="gio_bat_dau" required>
+                                <span class="input-group-text">-</span>
+                                <input type="time" class="form-control" id="create_gio_ket_thuc" name="gio_ket_thuc" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="create_ghi_chu" class="form-label">Ghi chú</label>
+                        <textarea class="form-control" id="create_ghi_chu" name="ghi_chu" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu lịch tập</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -100,6 +234,8 @@
             slotMinTime: '06:00:00',
             slotMaxTime: '22:00:00',
             allDaySlot: false,
+            selectable: true,
+            selectMirror: true,
             events: {
                 url: '{{ route("admin.lich-tap.index") }}',
                 extraParams: function() {
@@ -107,6 +243,18 @@
                         id_pt: filterPt.value
                     };
                 }
+            },
+            select: function(info) {
+                // Open create modal
+                var modal = new bootstrap.Modal(document.getElementById('createModal'));
+                
+                // Pre-fill date and time
+                document.getElementById('create_ngay_tap').value = info.startStr.split('T')[0];
+                document.getElementById('create_gio_bat_dau').value = info.startStr.split('T')[1].substring(0, 5);
+                document.getElementById('create_gio_ket_thuc').value = info.endStr.split('T')[1].substring(0, 5);
+                
+                modal.show();
+                calendar.unselect();
             },
             eventClick: function(info) {
                 var event = info.event;
@@ -153,6 +301,22 @@
         
         filterPt.addEventListener('change', function() {
             calendar.refetchEvents();
+        });
+
+        // Handle customer selection in create modal
+        document.getElementById('create_id_khach_hang').addEventListener('change', function() {
+            var selectedOption = this.options[this.selectedIndex];
+            var ptId = selectedOption.getAttribute('data-pt');
+            var ptDisplay = document.getElementById('create_id_pt_display');
+            var ptInput = document.getElementById('create_id_pt');
+            
+            if (ptId) {
+                ptDisplay.value = ptId;
+                ptInput.value = ptId;
+            } else {
+                ptDisplay.value = "";
+                ptInput.value = "";
+            }
         });
     });
 </script>

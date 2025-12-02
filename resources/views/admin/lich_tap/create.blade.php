@@ -39,7 +39,7 @@
                     
                     <div class="mb-3">
                         <label for="id_pt" class="form-label">PT hướng dẫn <span class="text-danger">*</span></label>
-                        <select class="form-select @error('id_pt') is-invalid @enderror" id="id_pt" name="id_pt" required>
+                        <select class="form-select @error('id_pt') is-invalid @enderror" id="id_pt_display" disabled>
                             <option value="">-- Chọn PT --</option>
                             @foreach($pts as $pt)
                                 <option value="{{ $pt->id }}" {{ old('id_pt') == $pt->id ? 'selected' : '' }}>
@@ -47,6 +47,8 @@
                                 </option>
                             @endforeach
                         </select>
+                        <input type="hidden" name="id_pt" id="id_pt" value="{{ old('id_pt') }}">
+                        <div class="form-text">PT được tự động chọn theo gói tập của khách hàng.</div>
                         @error('id_pt')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -104,10 +106,15 @@
     document.getElementById('id_khach_hang').addEventListener('change', function() {
         var selectedOption = this.options[this.selectedIndex];
         var ptId = selectedOption.getAttribute('data-pt');
-        var ptSelect = document.getElementById('id_pt');
+        var ptDisplay = document.getElementById('id_pt_display');
+        var ptInput = document.getElementById('id_pt');
         
         if (ptId) {
-            ptSelect.value = ptId;
+            ptDisplay.value = ptId;
+            ptInput.value = ptId;
+        } else {
+            ptDisplay.value = "";
+            ptInput.value = "";
         }
     });
     

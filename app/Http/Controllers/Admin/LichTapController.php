@@ -21,8 +21,8 @@ class LichTapController extends Controller
         // Get data for filters
         $pts = Pt::with('nguoiDung')->get();
         
-        // If it's an AJAX request for FullCalendar events
-        if ($request->ajax()) {
+        // If it's a request for FullCalendar events (has start/end params)
+        if ($request->has('start') && $request->has('end')) {
             $start = $request->start;
             $end = $request->end;
             
@@ -38,8 +38,10 @@ class LichTapController extends Controller
             
             $events = [];
             foreach ($schedules as $schedule) {
-                $color = '#3788d8'; // Default blue for da_xep
-                if ($schedule->trang_thai == 'da_hoc') $color = '#28a745'; // Green
+                // Generate color based on customer ID
+                $color = $this->getColorForCustomer($schedule->id_khach_hang);
+                
+                // Override color if status is special
                 if ($schedule->trang_thai == 'huy') $color = '#dc3545'; // Red
                 if ($schedule->trang_thai == 'vang_mat') $color = '#6c757d'; // Grey
                 
@@ -62,7 +64,32 @@ class LichTapController extends Controller
             return response()->json($events);
         }
         
-        return view('admin.lich_tap.index', compact('pts'));
+        $upcomingSchedules = LichTap::with(['pt.nguoiDung', 'khachHang.nguoiDung'])
+            ->upcoming()
+            ->take(10)
+            ->get();
+
+        // Get customers for create modal
+        $khachHangs = KhachHang::whereHas('dangKyGoi', function($q) {
+            $q->hoatDong()->where('buoi_con_lai', '>', 0);
+        })->with(['nguoiDung', 'dangKyGoi' => function($q) {
+            $q->hoatDong()->where('buoi_con_lai', '>', 0)->with('goiTap');
+        }])->get();
+
+        return view('admin.lich_tap.index', compact('pts', 'upcomingSchedules', 'khachHangs'));
+    }
+
+    /**
+     * Generate a consistent color for a customer
+     */
+    private function getColorForCustomer($id)
+    {
+        $colors = [
+            '#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#fd7e14', 
+            '#ffc107', '#198754', '#20c997', '#0dcaf0', '#343a40'
+        ];
+        
+        return $colors[$id % count($colors)];
     }
 
     /**
