@@ -19,7 +19,7 @@ class KhachHangController extends Controller
      */
     public function index(Request $request)
     {
-        $query = KhachHang::with('nguoiDung');
+        $query = KhachHang::with(['nguoiDung', 'dangKyGoi']);
 
         // Filter by card status
         if ($request->filled('trang_thai_the')) {
@@ -32,6 +32,11 @@ class KhachHangController extends Controller
         }
 
         $khachHangs = $query->latest()->paginate(15);
+        
+        // Auto-update expired cards
+        foreach ($khachHangs as $kh) {
+            $kh->checkAndUpdateExpiredStatus();
+        }
 
         return view('admin.khach_hang.index', compact('khachHangs'));
     }
@@ -57,6 +62,7 @@ class KhachHangController extends Controller
             'ngay_sinh' => 'nullable|date',
             'gioi_tinh' => 'nullable|in:nam,nu,khac',
             'avatar' => 'nullable|image|max:2048',
+            'thoi_han_thang' => 'nullable|in:3,6,12',
         ]);
 
         DB::beginTransaction();
@@ -82,11 +88,19 @@ class KhachHangController extends Controller
             // Create customer record with auto-generated card number
             $maThe = KhachHang::generateMaThe();
             
-            KhachHang::create([
+            // Set thoi_han_thang (default 3 months)
+            $thoiHanThang = $validated['thoi_han_thang'] ?? 3;
+            
+            $khachHang = KhachHang::create([
                 'id_nguoi_dung' => $nguoiDung->id,
                 'ma_the' => $maThe,
                 'trang_thai_the' => 'hoat_dong',
+                'thoi_han_thang' => $thoiHanThang,
             ]);
+            
+            // Calculate expiration date from created_at + thoi_han_thang
+            $ngayHetHan = KhachHang::calculateExpirationDate($khachHang->created_at, $thoiHanThang);
+            $khachHang->update(['ngay_het_han' => $ngayHetHan]);
 
             DB::commit();
 

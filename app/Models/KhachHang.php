@@ -22,7 +22,34 @@ class KhachHang extends Model
         'id_nguoi_dung',
         'ma_the',
         'trang_thai_the',
+        'thoi_han_thang',
+        'ngay_het_han',
     ];
+
+    /**
+     * Default attributes
+     */
+    protected $attributes = [
+        'thoi_han_thang' => 3,
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     */
+    protected function casts(): array
+    {
+        return [
+            'ngay_het_han' => 'date',
+        ];
+    }
+
+    /**
+     * Get start date (using created_at)
+     */
+    public function getNgayBatDauAttribute()
+    {
+        return $this->created_at;
+    }
 
     /**
      * Relationship to NguoiDung
@@ -56,6 +83,15 @@ class KhachHang extends Model
         return $query->whereHas('dangKyGoi', function($q) {
             $q->where('trang_thai', 'hoat_dong');
         });
+    }
+
+    /**
+     * Scope for expired cards
+     */
+    public function scopeExpired($query)
+    {
+        return $query->whereNotNull('ngay_het_han')
+            ->where('ngay_het_han', '<=', now());
     }
 
     /**
@@ -120,5 +156,54 @@ class KhachHang extends Model
     public function getAvatarAttribute()
     {
         return $this->nguoiDung->avatar;
+    }
+
+    /**
+     * Check if card is expired
+     */
+    public function getIsExpiredAttribute()
+    {
+        if (!$this->ngay_het_han) {
+            return false;
+        }
+        return $this->ngay_het_han->isPast();
+    }
+
+    /**
+     * Get remaining days until expiration (integer only)
+     */
+    public function getSoNgayConLaiAttribute()
+    {
+        if (!$this->ngay_het_han) {
+            return null;
+        }
+        
+        if ($this->is_expired) {
+            return 0;
+        }
+        
+        // Return integer (ceiling to always show positive days remaining)
+        $days = now()->diffInDays($this->ngay_het_han, false);
+        return (int) ceil($days);
+    }
+
+    /**
+     * Check and update card status if expired
+     */
+    public function checkAndUpdateExpiredStatus()
+    {
+        if ($this->is_expired && $this->trang_thai_the !== 'het_han') {
+            $this->update(['trang_thai_the' => 'het_han']);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Calculate expiration date based on start date and months
+     */
+    public static function calculateExpirationDate($startDate, $months)
+    {
+        return \Carbon\Carbon::parse($startDate)->addMonths($months);
     }
 }

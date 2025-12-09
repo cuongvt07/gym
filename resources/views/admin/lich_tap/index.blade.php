@@ -31,9 +31,22 @@
     </div>
 </div>
 
-<!-- Calendar -->
-    <div class="card-body p-0">
-        <div id="calendar"></div>
+
+<!-- Calendar (Collapsible) -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="bi bi-calendar-week me-2"></i>Lịch tập
+        </h6>
+        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#calendarCollapse" aria-expanded="true" aria-controls="calendarCollapse">
+            <i class="bi bi-chevron-up" id="calendarToggleIcon"></i>
+            <span id="calendarToggleText">Thu gọn</span>
+        </button>
+    </div>
+    <div class="collapse show" id="calendarCollapse">
+        <div class="card-body p-0">
+            <div id="calendar"></div>
+        </div>
     </div>
 </div>
 
@@ -317,6 +330,23 @@
                 ptDisplay.value = "";
                 ptInput.value = "";
             }
+        });
+        
+        // Handle collapse/expand icon toggle
+        var calendarCollapse = document.getElementById('calendarCollapse');
+        var toggleIcon = document.getElementById('calendarToggleIcon');
+        var toggleText = document.getElementById('calendarToggleText');
+        
+        calendarCollapse.addEventListener('show.bs.collapse', function () {
+            toggleIcon.classList.remove('bi-chevron-down');
+            toggleIcon.classList.add('bi-chevron-up');
+            toggleText.textContent = 'Thu gọn';
+        });
+        
+        calendarCollapse.addEventListener('hide.bs.collapse', function () {
+            toggleIcon.classList.remove('bi-chevron-up');
+            toggleIcon.classList.add('bi-chevron-down');
+            toggleText.textContent = 'Mở rộng';
         });
     });
 </script>

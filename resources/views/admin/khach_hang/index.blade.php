@@ -53,8 +53,9 @@
                         <th>Mã thẻ</th>
                         <th>Avatar</th>
                         <th>Họ tên</th>
-                        <th>Email</th>
                         <th>Số điện thoại</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày hết hạn</th>
                         <th>Trạng thái thẻ</th>
                         <th>Hạng</th>
                         <th>Thao tác</th>
@@ -71,15 +72,49 @@
                                      onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22%3E%3Ccircle cx=%22100%22 cy=%22100%22 r=%22100%22 fill=%22%23e0e0e0%22/%3E%3Ccircle cx=%22100%22 cy=%2280%22 r=%2235%22 fill=%22%239e9e9e%22/%3E%3Cellipse cx=%22100%22 cy=%22160%22 rx=%2260%22 ry=%2240%22 fill=%22%239e9e9e%22/%3E%3C/svg%3E'">
                             </td>
                             <td>{{ $kh->nguoiDung->ho_ten }}</td>
-                            <td>{{ $kh->nguoiDung->email }}</td>
                             <td>{{ $kh->nguoiDung->sdt ?? '-' }}</td>
                             <td>
-                                @if($kh->trang_thai_the == 'hoat_dong')
-                                    <span class="badge bg-success">Hoạt động</span>
-                                @elseif($kh->trang_thai_the == 'khoa')
-                                    <span class="badge bg-danger">Khóa</span>
+                                @if($kh->ngay_bat_dau)
+                                    <span class="text-muted">
+                                        <i class="bi bi-calendar-event me-1"></i>{{ $kh->ngay_bat_dau->format('d/m/Y') }}
+                                    </span>
                                 @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($kh->ngay_het_han)
+                                    <div>
+                                        <i class="bi bi-calendar-x me-1"></i>{{ $kh->ngay_het_han->format('d/m/Y') }}
+                                    </div>
+                                    @if($kh->is_expired)
+                                        <span class="badge bg-danger mt-1">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>Đã hết hạn
+                                        </span>
+                                    @elseif($kh->so_ngay_con_lai !== null)
+                                        @if($kh->so_ngay_con_lai <= 7)
+                                            <span class="badge bg-warning text-dark mt-1">
+                                                <i class="bi bi-hourglass-split me-1"></i>Còn {{ $kh->so_ngay_con_lai }} ngày
+                                            </span>
+                                        @elseif($kh->so_ngay_con_lai <= 30)
+                                            <span class="badge bg-info mt-1">
+                                                <i class="bi bi-clock me-1"></i>Còn {{ $kh->so_ngay_con_lai }} ngày
+                                            </span>
+                                        @else
+                                            <span class="badge bg-success mt-1">
+                                                <i class="bi bi-check-circle me-1"></i>Còn {{ $kh->so_ngay_con_lai }} ngày
+                                            </span>
+                                        @endif
+                                    @endif
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($kh->is_expired)
                                     <span class="badge bg-secondary">Hết hạn</span>
+                                @else
+                                    <span class="badge bg-success">Hoạt động</span>
                                 @endif
                             </td>
                             <td>
@@ -97,12 +132,6 @@
                                     <a href="{{ route('admin.khach-hang.edit', $kh->id) }}" class="btn btn-warning" title="Sửa">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <form action="{{ route('admin.khach-hang.toggle-card', $kh->id) }}" method="POST" class="d-inline toggle-status-form">
-                                        @csrf
-                                        <button type="submit" class="btn btn-{{ $kh->trang_thai_the == 'khoa' ? 'success' : 'secondary' }}" title="{{ $kh->trang_thai_the == 'khoa' ? 'Mở thẻ' : 'Khóa thẻ' }}">
-                                            <i class="bi bi-{{ $kh->trang_thai_the == 'khoa' ? 'unlock' : 'lock' }}"></i>
-                                        </button>
-                                    </form>
                                 </div>
                             </td>
                         </tr>

@@ -83,6 +83,21 @@
                             @enderror
                         </div>
                         
+                        <div class="col-md-6 mb-3">
+                            <label for="thoi_han_thang" class="form-label">Thời hạn thẻ</label>
+                            <select class="form-select @error('thoi_han_thang') is-invalid @enderror" id="thoi_han_thang" name="thoi_han_thang">
+                                <option value="3" {{ old('thoi_han_thang', '3') == '3' ? 'selected' : '' }}>3 tháng (Mặc định)</option>
+                                <option value="6" {{ old('thoi_han_thang') == '6' ? 'selected' : '' }}>6 tháng</option>
+                                <option value="12" {{ old('thoi_han_thang') == '12' ? 'selected' : '' }}>12 tháng</option>
+                            </select>
+                            @error('thoi_han_thang')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">
+                                <i class="bi bi-calendar-check me-1"></i>Ngày bắt đầu = thời điểm tạo khách hàng
+                            </small>
+                        </div>
+                        
                         <div class="col-md-12 mb-3">
                             <label for="avatar" class="form-label">Ảnh thẻ</label>
                             <input type="file" class="form-control @error('avatar') is-invalid @enderror" 
